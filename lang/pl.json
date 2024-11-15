@@ -1,0 +1,19 @@
+{
+  "pl": {
+    "watched": "Czas oglądania dzisiaj: %{t} min.",
+    "left": "Pozostało dzisiaj: %{t} min.",
+    "exceed": "Przekroczono o: %{t} min.",
+    "today": "Ustaw limit oglądania na dzisiaj: %{t} min.",
+    "default": "Domyślny limit oglądania: %{t} min.",
+    "enabled": "🟢 Konto aktywne",
+    "disabled": "🔴 Konto zablokowane",
+    "selected": "Wybrano użytkownika: %{u}",
+    "restricted": "Jesteś poza siecią domową.",
+    "lock" : "Zablokuj natychmiast",
+    "unlock": "Przywróć dostęp",
+    "locked" : "Konto zablokowano.",
+    "unlocked": "Konto przywrócono.",
+    "add": "Dodano %{t} min.",
+    "sub": "Odjęto %{t} min."
+  }
+}

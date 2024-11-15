@@ -1,0 +1,24 @@
+server:
+  host: https://movies.somedomain.com      # Jellyfin server address
+  token: 3490000000000000000000000000057b  # token used for authorization (api key for admin account)
+
+limits:
+  default_limit: 75
+  user_limits:
+    7ad00000000000000000000000000999: 45
+    bc10000000000000000000000000084c: 120
+  no_limit_users:
+    - 6d300000000000000000000000000f1a
+  polling_interval: 1.2
+  account_enable_on_day_reset: true
+
+view:
+  default_user: 7ad00000000000000000000000000999
+  language: en
+
+access:
+  limit_clients: false
+  accepted_clients:
+    - "127.0.0."
+    - "192.168."
+    - "10."

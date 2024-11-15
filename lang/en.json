@@ -1,0 +1,19 @@
+{
+  "en": {
+    "watched": "Watched today: %{t} min.",
+    "left": "Left today: %{t} min.",
+    "exceed": "Limit exceeded by: %{t} min.",
+    "today": "Today's limit is set to: %{t} min.",
+    "default": "Default watch limit: %{t} min.",
+    "enabled": "🟢 Account enabled",
+    "disabled": "🔴 Account disabled",
+    "selected": "Selected user: %{u}",
+    "restricted": "You are outside your home network.",
+    "lock" : "Disable account now",
+    "unlock": "Restore access",
+    "locked" : "User account disabled",
+    "unlocked": "User account enabled",
+    "add": "%{t} min added.",
+    "sub": "%{t} min subtracted."
+  }
+}
