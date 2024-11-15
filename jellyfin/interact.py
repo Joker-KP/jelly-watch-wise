@@ -29,20 +29,20 @@ class ServerInteraction:
             prev_folders = self.user_data[user_id]["folders"]
             if len(folders) == 0 and len(prev_folders) > 0:
                 # print('restore folders')
-                #self.api.set_enabled_folders(user_id, prev_folders)
+                self.api.set_enabled_folders(user_id, prev_folders)
                 pass
         else:
             if len(folders) > 0:
                 # print('soft lock action - disable folders')
                 self.user_data[user_id]["folders"] = folders  # keep folders for later restore
-                #self.api.set_enabled_folders(user_id, [])
+                self.api.set_enabled_folders(user_id, [])
 
     def get_today_watched_min(self, user_id):
         now = datetime.today()
         date_start = now.strftime('%Y-%m-%d')
         date_end = (now + timedelta(1)).strftime('%Y-%m-%d')
-        date_start = '2024-11-09'
-        date_end = '2024-11-10'
+        # date_start = '2024-11-09'
+        # date_end = '2024-11-10'
         time = self.api.get_total_time_sec(user_id, date_start, date_end) // 60
         return time
 

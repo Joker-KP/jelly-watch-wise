@@ -1,7 +1,3 @@
-# TODO
-# dockerize
-
-
 import i18n
 from nicegui import app, ui
 from nicegui.events import ValueChangeEventArguments

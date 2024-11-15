@@ -1,10 +1,17 @@
+from os.path import isfile
+
 import yaml
 
 
 class Configuration:
-    def __init__(self, config_file='config/config.yaml'):
-        with open(config_file, 'r') as file:
-            self.config = yaml.safe_load(file)
+    def __init__(self, config_files=['config/config.yaml', '/config/config.yaml']):
+        self.config = None
+        for config_file in config_files:
+            if isfile(config_file):
+                with open(config_file, 'r') as file:
+                    self.config = yaml.safe_load(file)
+        if self.config is None:
+            raise FileNotFoundError(", ".join(config_files) + " - not found")
 
         self.host = self.get_key('server', 'host', None)
         self.token = self.get_key('server', 'token', None)
