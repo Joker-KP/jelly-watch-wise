@@ -1,0 +1,20 @@
+{
+  "fr": {
+    "watched": "Regardé aujourd'hui : %{t} min.",
+    "left": "Il reste pour aujourd'hui : %{t} min.",
+    "exceed": "Limite dépassée de : %{t} min.",
+    "today": "La limite d'aujourd'hui est fixée à : %{t} min.",
+    "default": "Limite par défaut : %{t} min.",
+    "enabled": "🟢 Compte activé",
+    "disabled": "🔴 Compte désactivé",
+    "selected": "Utilisateur sélectionné : %{u}",
+    "restricted": "Vous êtes en dehors de votre réseau local. (%{ip})",
+    "lock" : "Désactiver le compte maintenant",
+    "unlock": "Rétablir le compte",
+    "locked" : "Compte utilisateur désactivé",
+    "unlocked": "Compte utilisateur activé",
+    "add": "%{t} min ajoutées.",
+    "sub": "%{t} min soustraites.",
+    "tech": "Détails techniques"
+  }
+}
