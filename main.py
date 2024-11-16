@@ -51,7 +51,7 @@ def change_limit(diff):
     model['altered_limit'] = clip(model['altered_limit'] + diff, 0, 360)
     interact.refresh_model(model, user_id)
     interact.media_folders_locker(user_id)
-    logger.info('User {user_id} limit change: {diff}')
+    logger.info(f'User {user_id} limit change: {diff}')
 
 
 def disable_user(lock: bool):
@@ -59,7 +59,7 @@ def disable_user(lock: bool):
     interact.disable_user(user_id, lock)
     ui.notify(i18n.t('locked') if lock else i18n.t('unlocked'))
     interact.refresh_model(model, user_id)
-    logger.info('User {user_id} is disabled: {lock}')
+    logger.info(f'User {user_id} is disabled: {lock}')
 
 
 @app.get('/trigger/{user_id}')

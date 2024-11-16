@@ -1,14 +1,43 @@
+import os.path
 from datetime import datetime, timedelta
 
 import i18n
+import yaml
 
 from config import logger
 from jellyfin.api import ServerApi
 
 
+class FoldersBackup:
+    def __init__(self):
+        self.folder_backup_name = 'config/user-folders.bck'
+
+    def keep_user_folders(self, user_id, folders):
+        count = len(folders)
+        logger.debug(f'keep folders of user {user_id}, total {count}')
+        if count > 0:
+            folders_collection = {}
+            if os.path.isfile(self.folder_backup_name):
+                with open(self.folder_backup_name, 'r') as file:
+                    folders_collection = yaml.safe_load(file)
+            folders_collection[user_id] = folders
+            with open(self.folder_backup_name, 'w') as file:
+                yaml.dump(folders_collection, file)
+
+    def restore_user_folders(self, user_id):
+        logger.debug(f'restore user folders {user_id}')
+        if os.path.isfile(self.folder_backup_name):
+            with open(self.folder_backup_name, 'r') as file:
+                backup = yaml.safe_load(file)
+                if user_id in backup:
+                    return backup[user_id]
+        return []
+
+
 class ServerInteraction:
     def __init__(self, config):
         self.config = config
+        self.backup = FoldersBackup()
         self.api = ServerApi(config.host, config.token)
         self.select_users = config.get_select_users(self.api.get_users())
         self.user_data = self.get_user_data()
@@ -19,15 +48,20 @@ class ServerInteraction:
             limit = self.config.user_limits[
                 user_id] if user_id in self.config.user_limits else self.config.default_limit
             folders = self.api.get_enabled_folders(user_id)
+            self.backup.keep_user_folders(user_id, folders)
             user_data[user_id] = {'limit': limit, 'folders': folders, 'altered_limit': limit}
         return user_data
 
     def media_folders_locker(self, user_id):
+        logger.debug('media folders lock/unlock')
         time = self.get_today_watched_min(user_id)
         time_left = self.user_data[user_id]['altered_limit'] - time
         folders = self.api.get_enabled_folders(user_id)
+        self.backup.keep_user_folders(user_id, folders)
         if time_left > 0:
             prev_folders = self.user_data[user_id]['folders']
+            if len(prev_folders) == 0:
+                prev_folders = self.backup.restore_user_folders(user_id)
             if len(folders) == 0 and len(prev_folders) > 0:
                 self.api.set_enabled_folders(user_id, prev_folders)
                 logger.info('folders restored')
