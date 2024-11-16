@@ -2,26 +2,27 @@ server:
   host: https://movies.somedomain.com      # Jellyfin server address
   token: 3490000000000000000000000000057b  # token used for authorization (api key for admin account)
 
-limits:
+limits:                                    # all time values are in minutes
   default_limit: 75
   user_limits:
     7ad00000000000000000000000000999: 45
     bc10000000000000000000000000084c: 120
-  no_limit_users:
+  no_limit_users:                          # users that will not be shown for limit checks (put admin accounts here)
     - 6d300000000000000000000000000f1a
-  polling_interval: 1.2
   account_enable_on_day_reset: true
+  polling_interval: 1.2                    # time between refreshing state from Jellyfin server
+                                           # (can be 0 when webhooks are defined to call http://yourWatchWise/trigger)
 
 view:
   default_user: 7ad00000000000000000000000000999
   language: en
 
 access:
-  limit_clients: false
-  accepted_clients:
+  limit_clients: false           # when true the client IP address has to start with
+  accepted_clients:              # one of the 'accepted client' items
     - "127.0.0."
     - "192.168."
     - "10."
 
 general:
-  log_level: info
+  log_level: info                 # critical, error, warning, info, or debug

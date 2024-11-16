@@ -131,6 +131,7 @@ async def index():
     except TimeoutError:  # ui.context.client.connected() may throw it
         pass
 
+
 if config.polling_interval > 0:
     interval_sec = config.polling_interval * 60
     ui.timer(interval_sec, lambda: trigger_all_users())
