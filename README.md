@@ -56,7 +56,7 @@ docker pull macjoker/jelly-watch-wise
    * `host` - your Jellyfin server address
    * `token` - your Jellyfin API key.
 
-   See sample config file in the repository for reference.
+   See [sample config file](https://github.com/Joker-KP/jelly-watch-wise/blob/main/config/config-sample.yaml) in the repository for reference.
 
 
 3. Run the container
