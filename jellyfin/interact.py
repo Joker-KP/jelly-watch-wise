@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 
 import i18n
 
+from config import logger
 from jellyfin.api import ServerApi
 
 
@@ -18,24 +19,23 @@ class ServerInteraction:
             limit = self.config.user_limits[
                 user_id] if user_id in self.config.user_limits else self.config.default_limit
             folders = self.api.get_enabled_folders(user_id)
-            user_data[user_id] = {"limit": limit, "folders": folders, "altered_limit": limit}
+            user_data[user_id] = {'limit': limit, 'folders': folders, 'altered_limit': limit}
         return user_data
 
     def media_folders_locker(self, user_id):
         time = self.get_today_watched_min(user_id)
-        time_left = self.user_data[user_id]["altered_limit"] - time
+        time_left = self.user_data[user_id]['altered_limit'] - time
         folders = self.api.get_enabled_folders(user_id)
         if time_left > 0:
-            prev_folders = self.user_data[user_id]["folders"]
+            prev_folders = self.user_data[user_id]['folders']
             if len(folders) == 0 and len(prev_folders) > 0:
-                # print('restore folders')
                 self.api.set_enabled_folders(user_id, prev_folders)
-                pass
+                logger.info('folders restored')
         else:
             if len(folders) > 0:
-                # print('soft lock action - disable folders')
-                self.user_data[user_id]["folders"] = folders  # keep folders for later restore
+                self.user_data[user_id]['folders'] = folders  # keep folders for later restore
                 self.api.set_enabled_folders(user_id, [])
+                logger.info('folders disabled - soft lock action')
 
     def get_today_watched_min(self, user_id):
         now = datetime.today()
@@ -51,7 +51,7 @@ class ServerInteraction:
 
     def reset_altered_limits(self):
         for user_id in self.select_users:
-            self.user_data[user_id]["altered_limit"] = self.user_data[user_id]["limit"]
+            self.user_data[user_id]['altered_limit'] = self.user_data[user_id]['limit']
 
     def enable_accounts(self):
         if self.config.account_enable_on_day_reset:
@@ -60,13 +60,14 @@ class ServerInteraction:
 
     def refresh_model(self, model, user_id):
         if model['user_id'] != user_id:
-            model['altered_limit'] = self.user_data[user_id]["altered_limit"]
+            model['altered_limit'] = self.user_data[user_id]['altered_limit']
             model['user_id'] = user_id
         is_disabled = self.api.is_user_disabled(user_id)
         time_watched = self.get_today_watched_min(user_id)
         time_left = model['altered_limit'] - time_watched
-        default_limit = self.user_data[user_id]["limit"]
-        self.user_data[user_id]["altered_limit"] = model['altered_limit']  # keep on changing users
+        default_limit = self.user_data[user_id]['limit']
+        self.user_data[user_id]['altered_limit'] = model['altered_limit']  # keep on changing users
+        folders = self.user_data[user_id]['folders']
 
         model['time_left'] = time_left
         model['time_watched_msg'] = i18n.t('watched', t=time_watched)
@@ -75,3 +76,4 @@ class ServerInteraction:
         model['altered_limit_msg'] = i18n.t('today', t=model['altered_limit'])
         model['active_msg'] = i18n.t('disabled') if is_disabled else i18n.t('enabled')
         model['progress'] = time_watched / model['altered_limit']
+        model['folders'] = "Folders:\n" + " \n".join(folders)

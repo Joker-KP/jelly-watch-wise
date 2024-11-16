@@ -22,3 +22,6 @@ access:
     - "127.0.0."
     - "192.168."
     - "10."
+
+general:
+  log_level: info

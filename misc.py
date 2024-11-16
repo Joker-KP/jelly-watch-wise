@@ -3,7 +3,7 @@ from datetime import datetime
 import i18n
 
 
-def init_language(language_code):
+def setup_language(language_code):
     i18n.load_path.append('lang')
     i18n.set('file_format', 'json')
     i18n.set('filename_format', '{locale}.{format}')
@@ -17,3 +17,10 @@ def clip(val, min_, max_):
 
 def get_today():
     return datetime.today().strftime('%Y-%m-%d')
+
+
+def has_new_day_begun(model):
+    if model['today'] != get_today():
+        model['today'] = get_today()
+        return True
+    return False

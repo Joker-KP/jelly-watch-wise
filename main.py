@@ -2,12 +2,13 @@ import i18n
 from nicegui import app, ui
 from nicegui.events import ValueChangeEventArguments
 
-from config import Configuration
+from config import Configuration, logger
 from jellyfin.interact import ServerInteraction
-from misc import clip, init_language, get_today
+from misc import clip, setup_language, get_today, has_new_day_begun
 
 model = {
     'user_id': None,
+    'folders': None,
     'time_left': 0,
     'altered_limit': 0,
     'time_watched_msg': None,
@@ -15,14 +16,15 @@ model = {
     'default_limit_msg': None,
     'altered_limit_msg': None,
     'active_msg': None,
-    'progress': 0
+    'progress': 0,
+    'today': get_today()
 }
 
 # init
 config = Configuration()
+setup_language(config.language)
 interact = ServerInteraction(config)
-init_language(config.language)
-model['today'] = get_today()
+interact.refresh_model(model, config.default_user)
 
 
 class TimeLeftLabel(ui.label):
@@ -49,6 +51,7 @@ def change_limit(diff):
     model['altered_limit'] = clip(model['altered_limit'] + diff, 0, 360)
     interact.refresh_model(model, user_id)
     interact.media_folders_locker(user_id)
+    logger.info('User {user_id} limit change: {diff}')
 
 
 def disable_user(lock: bool):
@@ -56,26 +59,31 @@ def disable_user(lock: bool):
     interact.disable_user(user_id, lock)
     ui.notify(i18n.t('locked') if lock else i18n.t('unlocked'))
     interact.refresh_model(model, user_id)
+    logger.info('User {user_id} is disabled: {lock}')
 
 
 @app.get('/trigger/{user_id}')
 def trigger_given_user(user_id):
+    logger.debug(f'trigger user with id {user_id}')
+    username = 'unknown'
     if user_id in interact.select_users:
         interact.media_folders_locker(user_id)
         username = interact.select_users[user_id]
-        return {'name': username}
-    return {'name': 'unknown'}
+    if user_id == model['user_id']:
+        interact.refresh_model(model, user_id)
+    return {'name': username}
 
 
 @app.get('/trigger')
 def trigger_all_users():
-    # print("trigger action")
-    if model['today'] != get_today():  # new day detection
-        model['today'] = get_today()
+    logger.debug('trigger all users')
+    if has_new_day_begun(model):
+        logger.info('new day reset')
         interact.reset_altered_limits()
         interact.enable_accounts()
     for user_id in interact.select_users:
         interact.media_folders_locker(user_id)
+    interact.refresh_model(model, model['user_id'])
     return {'all done'}
 
 
@@ -86,7 +94,7 @@ async def index():
         ip = ui.context.client.environ['asgi.scope']['client'][0]
 
         if not config.is_access_granted(ip):
-            ui.label(i18n.t('restricted'))
+            ui.label(i18n.t('restricted', ip=ip))
         else:
             with ui.row():
                 with ui.column():
@@ -115,15 +123,16 @@ async def index():
                 ui.button(i18n.t('lock'), on_click=lambda: disable_user(True)).props('color=red')
                 ui.button(i18n.t('unlock'), on_click=lambda: disable_user(False)).props('color=green')
 
-            ui.label().bind_text_from(model, 'user_id').style('color:#CCC; font-size:-1')
-
-            interact.refresh_model(model, config.default_user)
+            with ui.expansion(i18n.t('tech'), icon='build').style('color:#CCC; font-size:-1'):
+                ui.label().bind_text_from(model, 'user_id').style('color:#AAA; font-size:-1')
+                with ui.element('div').classes('p-2 bg-blue-100'):
+                    ui.label().bind_text_from(model, 'folders').style('color:#AAA; font-size:-1; white-space: pre-wrap')
 
     except TimeoutError:  # ui.context.client.connected() may throw it
         pass
 
-
 if config.polling_interval > 0:
     interval_sec = config.polling_interval * 60
     ui.timer(interval_sec, lambda: trigger_all_users())
-ui.run()
+
+ui.run(uvicorn_reload_includes='*.py, *.yaml')

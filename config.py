@@ -1,15 +1,40 @@
+import logging
 from os.path import isfile
 
 import yaml
 
+logger: logging.Logger = logging.getLogger('watchwise')
+
+LOG_LEVELS = {
+    'critical': logging.CRITICAL,
+    'error': logging.ERROR,
+    'warning': logging.WARNING,
+    'info': logging.INFO,
+    'debug': logging.DEBUG,
+}
+
+
+def setup_logging(log_level=logging.INFO):
+    logger.setLevel(log_level)
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(logging.Formatter('[%(levelname)7s] %(message)s'))
+    file_handler = logging.FileHandler('config/watchwise.log')
+    file_handler.setFormatter(logging.Formatter('%(asctime)s [%(levelname)s] %(message)s'))
+    logger.propagate = False
+    logger.addHandler(console_handler)
+    logger.addHandler(file_handler)
+
 
 class Configuration:
-    def __init__(self, config_files=['config/config.yaml', '/config/config.yaml']):
+    def __init__(self, config_files=['config.yaml', 'config/config.yaml', '/config/config.yaml']):
         self.config = None
         for config_file in config_files:
             if isfile(config_file):
                 with open(config_file, 'r') as file:
                     self.config = yaml.safe_load(file)
+                    self.log_level = self.get_key('general', 'log_level', 'info')
+                    setup_logging(LOG_LEVELS[self.log_level])
+                    logger.info(f'Configuration read from: {config_file}')
         if self.config is None:
             raise FileNotFoundError(", ".join(config_files) + " - not found")
 

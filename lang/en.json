@@ -8,12 +8,13 @@
     "enabled": "🟢 Account enabled",
     "disabled": "🔴 Account disabled",
     "selected": "Selected user: %{u}",
-    "restricted": "You are outside your home network.",
+    "restricted": "You are outside your home network. (%{ip})",
     "lock" : "Disable account now",
     "unlock": "Restore access",
     "locked" : "User account disabled",
     "unlocked": "User account enabled",
     "add": "%{t} min added.",
-    "sub": "%{t} min subtracted."
+    "sub": "%{t} min subtracted.",
+    "tech": "Technical details"
   }
 }

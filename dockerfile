@@ -27,17 +27,17 @@ WORKDIR /app
 COPY main.py misc.py config.py ./
 COPY jellyfin ./jellyfin
 COPY lang ./lang
-RUN mkdir /config
-#COPY config/config.yaml /config/config.yaml
-COPY config/config-sample.yaml /config/config-sample.yaml
+RUN mkdir ./config
+COPY config/config-sample.yaml ./config/config-sample.yaml
 RUN mkdir /resources
 COPY docker-entrypoint.sh /resources
 RUN chmod 777 /resources/docker-entrypoint.sh
 
-VOLUME /config
+VOLUME /app/config
 
 EXPOSE 8080
 ENV PYTHONUNBUFFERED=True
+ENV TZ=Europe/Warsaw
 
 ENTRYPOINT ["/resources/docker-entrypoint.sh"]
 CMD ["python", "main.py"]

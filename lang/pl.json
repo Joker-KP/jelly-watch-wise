@@ -8,12 +8,13 @@
     "enabled": "🟢 Konto aktywne",
     "disabled": "🔴 Konto zablokowane",
     "selected": "Wybrano użytkownika: %{u}",
-    "restricted": "Jesteś poza siecią domową.",
+    "restricted": "Jesteś poza siecią domową. (%{ip})",
     "lock" : "Zablokuj natychmiast",
     "unlock": "Przywróć dostęp",
     "locked" : "Konto zablokowano.",
     "unlocked": "Konto przywrócono.",
     "add": "Dodano %{t} min.",
-    "sub": "Odjęto %{t} min."
+    "sub": "Odjęto %{t} min.",
+    "tech": "Technikalia"
   }
 }
