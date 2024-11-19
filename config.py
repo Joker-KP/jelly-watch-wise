@@ -50,6 +50,9 @@ class Configuration:
         self.default_user = self.get_key('view', 'default_user', None)
         self.language = self.get_key('view', 'language', 'en')
 
+        self.stats_host = self.get_key('stats', 'host', None)
+        self.stats_token = self.get_key('stats', 'token', None)
+
         self.limit_clients = self.get_key('access', 'limit_clients', False)
         self.accepted_clients = self.get_key('access', 'accepted_clients', ["127.0.0.", "192.168.", "10."])
 

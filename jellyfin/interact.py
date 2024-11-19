@@ -6,6 +6,7 @@ import yaml
 
 from config import logger
 from jellyfin.api import ServerApi
+from jellyfin.stats import PlaytimeReporting, JellyStats
 
 
 class FoldersBackup:
@@ -38,7 +39,11 @@ class ServerInteraction:
     def __init__(self, config):
         self.config = config
         self.backup = FoldersBackup()
-        self.api = ServerApi(config.host, config.token)
+        if config.stats_host:
+            stats = JellyStats(config.stats_host, config.stats_token)
+        else:
+            stats = PlaytimeReporting(config.host, config.token)
+        self.api = ServerApi(config.host, config.token, stats)
         self.select_users = config.get_select_users(self.api.get_users())
         self.user_data = self.get_user_data()
 

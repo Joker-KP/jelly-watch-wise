@@ -24,3 +24,7 @@ def has_new_day_begun(model):
         model['today'] = get_today()
         return True
     return False
+
+
+def get_hours_of_today():
+    return int(datetime.today().strftime('%-H'))

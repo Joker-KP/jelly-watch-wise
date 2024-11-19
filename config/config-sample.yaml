@@ -24,5 +24,10 @@ access:
     - "192.168."
     - "10."
 
+# optional address and API key of JellyStat server; it replaces Playtime Reporting requirement
+# stats:
+#  host: https://mystats.somedomain.com
+#  token: 26700000000000000000000000000543
+
 general:
   log_level: info                 # critical, error, warning, info, or debug

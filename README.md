@@ -18,9 +18,14 @@ users' total watch time and restricts access to media libraries when their defin
 
   Simple GUI for configuring time limits without additional logging in.
 
-* **Requires Playback Reporting plugin**
+* **Requires Playback Reporting plugin or Jellystat server**
 
-  Requires the `Playback Reporting` plugin on your Jellyfin server.
+  Requires the 
+  [`Playback Reporting`](https://github.com/jellyfin/jellyfin-plugin-playbackreporting) 
+  plugin on your Jellyfin server
+  or
+  [`Jellystat`](https://github.com/CyferShepard/Jellystat)
+  server to retrieve aggregated user playtime.
 
 </td><td>
 
@@ -38,8 +43,15 @@ allowing you to adjust values without logging into the Jellyfin server.
 ## How to use it?
 
 ### Prerequisites
-1. Ensure the `Playback Reporting` plugin is installed on your Jellyfin server.
-2. Generate an **API Key** for JellyWatchWise from your Jellyfin admin account.
+1. Generate an **API Key** for JellyWatchWise from your Jellyfin admin account.
+2. Ensure access to aggregated user statistics with either:
+   * having the `Playback Reporting` plugin installed on your Jellyfin server 
+      
+     (this is default, no additional configuration needed),
+     
+   * access to your `Jellystat` server
+    
+     (put your host address and API key to the configuration file).
 
 ### Running with Docker
 The easiest way to get started is by using Docker:
