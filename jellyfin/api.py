@@ -14,10 +14,10 @@ class ServerApi:
 
     def get_users(self):
         users = {}
-        r = requests.get(f'{self.server}/user_usage_stats/user_list', headers=self.headers)
+        r = requests.get(f'{self.server}/Users', headers=self.headers)
         if r.status_code == 200:
             users = self.decoder.decode(r.text)
-            users = {x["id"]: x["name"] for x in users}
+            users = {x["Id"]: x["Name"] for x in users}
         return users
 
     def get_total_time_sec(self, user_id, date_start, date_end):
