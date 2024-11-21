@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 from os.path import isfile
 
 import yaml
@@ -23,6 +24,28 @@ def setup_logging(log_level=logging.INFO):
     logger.propagate = False
     logger.addHandler(console_handler)
     logger.addHandler(file_handler)
+
+
+def validate_limit_values(user_id, values):
+    if isinstance(values, int):
+        return
+    if isinstance(values, list) and len(values) == 2:
+        return
+    if isinstance(values, list) and len(values) == 7:
+        return
+    logger.warning(f'Improper limit for {user_id}: type {type(values)}')
+
+
+def get_limit(values):
+    if isinstance(values, int):
+        return values
+    if isinstance(values, list):
+        weekday = datetime.today().weekday()
+        if len(values) == 2:
+            return values[0] if weekday < 5 else values[1]
+        if len(values) == 7:
+            return values[weekday]
+    return None
 
 
 class Configuration:
@@ -56,6 +79,8 @@ class Configuration:
         self.limit_clients = self.get_key('access', 'limit_clients', False)
         self.accepted_clients = self.get_key('access', 'accepted_clients', ["127.0.0.", "192.168.", "10."])
 
+        self.validate_limits()
+
     def get_key(self, primary_key, secondary_key, default_value):
         if primary_key in self.config:
             if secondary_key in self.config[primary_key]:
@@ -85,3 +110,13 @@ class Configuration:
             if ip.startswith(accepted):
                 return True
         return False
+
+    def validate_limits(self):
+        validate_limit_values("default", self.default_limit)
+        for user_id, values in self.user_limits.items():
+            validate_limit_values(user_id, values)
+
+    def get_limit(self, user_id):
+        default_limit = get_limit(self.default_limit)
+        user_limit = get_limit(self.user_limits[user_id])
+        return user_limit if user_limit else default_limit

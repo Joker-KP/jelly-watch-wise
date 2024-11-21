@@ -50,11 +50,10 @@ class ServerInteraction:
     def get_user_data(self):
         user_data = {}
         for user_id in self.select_users:
-            limit = self.config.user_limits[
-                user_id] if user_id in self.config.user_limits else self.config.default_limit
+            limit = self.config.get_limit(user_id)
             folders = self.api.get_enabled_folders(user_id)
             self.backup.keep_user_folders(user_id, folders)
-            user_data[user_id] = {'limit': limit, 'folders': folders, 'altered_limit': limit}
+            user_data[user_id] = {'folders': folders, 'altered_limit': limit}
         return user_data
 
     def media_folders_locker(self, user_id):
@@ -90,7 +89,7 @@ class ServerInteraction:
 
     def reset_altered_limits(self):
         for user_id in self.select_users:
-            self.user_data[user_id]['altered_limit'] = self.user_data[user_id]['limit']
+            self.user_data[user_id]['altered_limit'] = self.config.get_limit(user_id)
 
     def enable_accounts(self):
         if self.config.account_enable_on_day_reset:
@@ -104,7 +103,7 @@ class ServerInteraction:
         is_disabled = self.api.is_user_disabled(user_id)
         time_watched = self.get_today_watched_min(user_id)
         time_left = model['altered_limit'] - time_watched
-        default_limit = self.user_data[user_id]['limit']
+        default_limit = self.config.get_limit(user_id)
         self.user_data[user_id]['altered_limit'] = model['altered_limit']  # keep on changing users
         folders = self.user_data[user_id]['folders']
 

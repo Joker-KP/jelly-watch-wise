@@ -3,10 +3,11 @@ server:
   token: 3490000000000000000000000000057b  # token used for authorization (api key for admin account)
 
 limits:                                    # all time values are in minutes
-  default_limit: 75
+  default_limit: [75, 120]
   user_limits:
-    7ad00000000000000000000000000999: 45
-    bc10000000000000000000000000084c: 120
+    7ad00000000000000000000000000999: 45           # a limit can be a single value,
+    bc10000000000000000000000000084c: [90, 120]    # a list with 2 items, first for workdays, second for weekend
+    e270000000000000000000000000093a: [5, 5, 5, 5, 5, 60, 90]  # or a list with 7 items: weekday limits from Mon to Sun
   no_limit_users:                          # users that will not be shown for limit checks (put admin accounts here)
     - 6d300000000000000000000000000f1a
   account_enable_on_day_reset: true
