@@ -118,5 +118,7 @@ class Configuration:
 
     def get_limit(self, user_id):
         default_limit = get_limit(self.default_limit)
-        user_limit = get_limit(self.user_limits[user_id])
+        user_limit = None
+        if user_id in self.user_limits:
+            user_limit = get_limit(self.user_limits[user_id])
         return user_limit if user_limit else default_limit
