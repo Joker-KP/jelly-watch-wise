@@ -19,9 +19,13 @@ def get_today():
     return datetime.today().strftime('%Y-%m-%d')
 
 
-def has_new_day_begun(model):
-    if model['today'] != get_today():
-        model['today'] = get_today()
+today = get_today()
+
+
+def has_new_day_begun():
+    global today
+    if today != get_today():
+        today = get_today()
         return True
     return False
 

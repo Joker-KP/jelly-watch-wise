@@ -7,6 +7,7 @@ import yaml
 from config import logger
 from jellyfin.api import ServerApi
 from jellyfin.stats import PlaytimeReporting, JellyStats
+from misc import clip
 
 
 class FoldersBackup:
@@ -91,27 +92,35 @@ class ServerInteraction:
         for user_id in self.select_users:
             self.user_data[user_id]['altered_limit'] = self.config.get_limit(user_id)
 
+    def alter_limit(self, user_id, diff):
+        current_limit = self.user_data[user_id]['altered_limit']
+        self.user_data[user_id]['altered_limit'] = clip(current_limit + diff, 0, 360)
+
+    def get_altered_limit(self, user_id):
+        return self.user_data[user_id]['altered_limit']
+
     def enable_accounts(self):
         if self.config.account_enable_on_day_reset:
             for user_id in self.select_users:
                 self.disable_user(user_id, False)
 
-    def refresh_model(self, model, user_id):
-        if model['user_id'] != user_id:
-            model['altered_limit'] = self.user_data[user_id]['altered_limit']
-            model['user_id'] = user_id
+    def refresh_view(self, model, user_id):
+        logger.debug('refresh_view started for {}'.format(self.select_users[user_id]))
         is_disabled = self.api.is_user_disabled(user_id)
         time_watched = self.get_today_watched_min(user_id)
-        time_left = model['altered_limit'] - time_watched
+        altered_limit = self.get_altered_limit(user_id)
         default_limit = self.config.get_limit(user_id)
-        self.user_data[user_id]['altered_limit'] = model['altered_limit']  # keep on changing users
+        time_left = altered_limit - time_watched
         folders = self.user_data[user_id]['folders']
 
+        if model['user_id'] != user_id:
+            model['user_id'] = user_id
+            logger.debug('user changed for {}, limit: {}'.format(self.select_users[user_id], altered_limit))
         model['time_left'] = time_left
         model['time_watched_msg'] = i18n.t('watched', t=time_watched)
         model['time_left_msg'] = i18n.t('left', t=time_left) if time_left > 0 else i18n.t('exceed', t=-time_left)
         model['default_limit_msg'] = i18n.t('default', t=default_limit)
-        model['altered_limit_msg'] = i18n.t('today', t=model['altered_limit'])
+        model['altered_limit_msg'] = i18n.t('today', t=altered_limit)
         model['active_msg'] = i18n.t('disabled') if is_disabled else i18n.t('enabled')
-        model['progress'] = time_watched / model['altered_limit']
+        model['progress'] = time_watched / altered_limit
         model['folders'] = "Folders:\n" + " \n".join(folders)
