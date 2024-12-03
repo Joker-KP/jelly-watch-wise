@@ -53,6 +53,8 @@ class JellyStats(AggregatedStatsSource):
         r = requests.post(f"{self.server}/stats/getGlobalUserStats", headers=self.headers, data=json.dumps(payload))
         time_sec = 0
         if r.status_code == 200:
+            if not r.text:  # version 1.1.1 returns inconsistent results - empty string instead of reporting 0 plays
+                return 0
             result_text = self.decoder.decode(r.text)["total_playback_duration"]
             if result_text:
                 time_sec = int(result_text)

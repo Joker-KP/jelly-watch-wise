@@ -104,7 +104,7 @@ class ServerInteraction:
             for user_id in self.select_users:
                 self.disable_user(user_id, False)
 
-    def refresh_view(self, model, user_id):
+    def refresh_view(self, view, user_id):
         logger.debug('refresh_view started for {}'.format(self.select_users[user_id]))
         is_disabled = self.api.is_user_disabled(user_id)
         time_watched = self.get_today_watched_min(user_id)
@@ -113,14 +113,15 @@ class ServerInteraction:
         time_left = altered_limit - time_watched
         folders = self.user_data[user_id]['folders']
 
-        if model['user_id'] != user_id:
-            model['user_id'] = user_id
+        if view['user_id'] != user_id:
+            view['user_id'] = user_id
+            view['user_link'] = f'{self.config.host}/web/#/dashboard/users/access?userId={user_id}'
             logger.debug('user changed for {}, limit: {}'.format(self.select_users[user_id], altered_limit))
-        model['time_left'] = time_left
-        model['time_watched_msg'] = i18n.t('watched', t=time_watched)
-        model['time_left_msg'] = i18n.t('left', t=time_left) if time_left > 0 else i18n.t('exceed', t=-time_left)
-        model['default_limit_msg'] = i18n.t('default', t=default_limit)
-        model['altered_limit_msg'] = i18n.t('today', t=altered_limit)
-        model['active_msg'] = i18n.t('disabled') if is_disabled else i18n.t('enabled')
-        model['progress'] = time_watched / altered_limit
-        model['folders'] = "Folders:\n" + " \n".join(folders)
+        view['time_left'] = time_left
+        view['time_watched_msg'] = i18n.t('watched', t=time_watched)
+        view['time_left_msg'] = i18n.t('left', t=time_left) if time_left > 0 else i18n.t('exceed', t=-time_left)
+        view['default_limit_msg'] = i18n.t('default', t=default_limit)
+        view['altered_limit_msg'] = i18n.t('today', t=altered_limit)
+        view['active_msg'] = i18n.t('disabled') if is_disabled else i18n.t('enabled')
+        view['progress'] = time_watched / altered_limit
+        view['folders'] = "Folders:\n" + " \n".join(folders)

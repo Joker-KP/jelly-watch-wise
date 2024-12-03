@@ -1,3 +1,5 @@
+import urllib
+
 import i18n
 from nicegui import app, ui
 from nicegui.events import ValueChangeEventArguments
@@ -44,6 +46,7 @@ def trigger_all_users():
 async def index():
     view = {
         'user_id': None,
+        'user_link': None,
         'folders': None,
         'time_left': 0,
         'time_watched_msg': None,
@@ -53,6 +56,7 @@ async def index():
         'active_msg': None,
         'progress': 0,
     }
+    link = None
 
     class TimeLeftLabel(ui.label):
         def _handle_text_change(self, text: str) -> None:
@@ -67,6 +71,7 @@ async def index():
         username = interact.select_users[user_id]
         ui.notify(i18n.t('selected', u=username))
         interact.refresh_view(view, user_id)
+        link.props(f'href="{view["user_link"]}"')  # no official support to bind target
 
     def change_limit(diff):
         if diff != 0:
@@ -132,7 +137,9 @@ async def index():
                 ui.button(i18n.t('unlock'), on_click=lambda: disable_user(False)).props('color=green')
 
             with ui.expansion(i18n.t('tech'), icon='build').style('color:#CCC; font-size:-1'):
-                ui.label().bind_text_from(view, 'user_id').style('color:#AAA; font-size:-1')
+                link_style = 'color:#AAA; font-size:-1'
+                url = f'{view["user_link"]}'
+                link = ui.link(target=url, new_tab=True).bind_text_from(view, 'user_id').style(link_style)
                 with ui.element('div').classes('p-2 bg-blue-100'):
                     ui.label().bind_text_from(view, 'folders').style('color:#AAA; font-size:-1; white-space: pre-wrap')
 
