@@ -10,6 +10,8 @@ limits:                                    # all time values are in minutes
     e270000000000000000000000000093a: [5, 5, 5, 5, 5, 60, 90]  # or a list with 7 items: weekday limits from Mon to Sun
   no_limit_users:                          # users that will not be shown for limit checks (put admin accounts here)
     - 6d300000000000000000000000000f1a
+  no_limit_folders:                        # folders (media libraries) that will be kept after exceeding limits
+    - b4f0000000000000000000000000095f
   account_enable_on_day_reset: true
   polling_interval: 1.2                    # time between refreshing state from Jellyfin server
                                            # (can be 0 when webhooks are defined to call http://yourWatchWise/trigger)

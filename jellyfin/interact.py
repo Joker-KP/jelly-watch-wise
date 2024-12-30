@@ -53,27 +53,36 @@ class ServerInteraction:
         for user_id in self.select_users:
             limit = self.config.get_limit(user_id)
             folders = self.api.get_enabled_folders(user_id)
-            self.backup.keep_user_folders(user_id, folders)
+            if not self.are_only_unlimited_folders(folders):
+                self.backup.keep_user_folders(user_id, folders)
             user_data[user_id] = {'folders': folders, 'altered_limit': limit}
         return user_data
+
+    def are_only_unlimited_folders(self, folders):
+        return len(folders) == 0 or all(x in self.config.no_limit_folders for x in folders)
+
+    def keep_unlimited_folders(self, folders):
+        return [x for x in folders if x in self.config.no_limit_folders]
 
     def media_folders_locker(self, user_id):
         logger.debug('media folders lock/unlock')
         time = self.get_today_watched_min(user_id)
         time_left = self.user_data[user_id]['altered_limit'] - time
         folders = self.api.get_enabled_folders(user_id)
-        self.backup.keep_user_folders(user_id, folders)
+        if not self.are_only_unlimited_folders(folders):
+            self.backup.keep_user_folders(user_id, folders)
         if time_left > 0:
             prev_folders = self.user_data[user_id]['folders']
-            if len(prev_folders) == 0:
+            if self.are_only_unlimited_folders(prev_folders):
                 prev_folders = self.backup.restore_user_folders(user_id)
-            if len(folders) == 0 and len(prev_folders) > 0:
+            if len(prev_folders) > 0 and len(prev_folders) > len(folders):
                 self.api.set_enabled_folders(user_id, prev_folders)
                 logger.info('folders restored')
         else:
-            if len(folders) > 0:
-                self.user_data[user_id]['folders'] = folders  # keep folders for later restore
-                self.api.set_enabled_folders(user_id, [])
+            if not self.are_only_unlimited_folders(folders):
+                self.user_data[user_id]['folders'] = folders  # store all folders for later restore
+                kept_folders = self.keep_unlimited_folders(folders)
+                self.api.set_enabled_folders(user_id, kept_folders)
                 logger.info('folders disabled - soft lock action')
 
     def get_today_watched_min(self, user_id):

@@ -67,6 +67,7 @@ class Configuration:
         self.default_limit = self.get_key('limits', 'default_limit', 60)
         self.user_limits = self.get_key('limits', 'user_limits', {})
         self.no_limit_users = self.get_key('limits', 'no_limit_users', [])
+        self.no_limit_folders = self.get_key('limits', 'no_limit_folders', [])
         self.polling_interval = self.get_key('limits', 'polling_interval', 0)
         self.account_enable_on_day_reset = self.get_key('limits', 'account_enable_on_day_reset', False)
 
