@@ -92,3 +92,4 @@ ENV/
 
 # IntelliJ
 out/
+.qodo

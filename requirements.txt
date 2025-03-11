@@ -1,0 +1,4 @@
+nicegui[plotly,matplotlib]
+isort
+requests
+python-i18n
