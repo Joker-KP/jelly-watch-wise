@@ -15,6 +15,8 @@
     "unlocked": "User account enabled",
     "add": "%{t} min added.",
     "sub": "%{t} min subtracted.",
-    "tech": "Technical details"
+    "tech": "Technical details",
+    "stop_sessions": "Stop all sessions",
+    "stopping_sessions": "Stopping all sessions..."
   }
 }

@@ -15,6 +15,8 @@
     "unlocked": "Konto przywrócono.",
     "add": "Dodano %{t} min.",
     "sub": "Odjęto %{t} min.",
-    "tech": "Technikalia"
+    "tech": "Technikalia",
+    "stop_sessions": "Zatrzymaj wszystkie sesje",
+    "stopping_sessions": "Zatrzymywanie wszystkich sesji..."
   }
 }

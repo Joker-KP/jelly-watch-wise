@@ -90,6 +90,13 @@ async def index():
         interact.disable_user(user_id, lock)
         trigger_given_user(user_id)
 
+    def stop_sessions():
+        user_id = view['user_id']
+        logger.info(f'Stopping all sessions for user {user_id}')
+        ui.notify(i18n.t('stopping_sessions'))
+        interact.stop_all_user_sessions(user_id)
+        trigger_given_user(user_id)
+
     def on_connect():
         logger.debug(f'client connected: ID {ui.context.client.id}')
         all_views[ui.context.client.id] = view
@@ -135,6 +142,7 @@ async def index():
                 ui.label().bind_text_from(view, 'active_msg')
                 ui.button(i18n.t('lock'), on_click=lambda: disable_user(True)).props('color=red')
                 ui.button(i18n.t('unlock'), on_click=lambda: disable_user(False)).props('color=green')
+                ui.button(i18n.t('stop_sessions'), on_click=lambda: stop_sessions()).props('color=orange')
 
             with ui.expansion(i18n.t('tech'), icon='build').style('color:#CCC; font-size:-1'):
                 link_style = 'color:#AAA; font-size:-1'

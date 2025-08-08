@@ -13,6 +13,7 @@ limits:                                    # all time values are in minutes
   no_limit_folders:                        # folders (media libraries) that will be kept after exceeding limits
     - b4f0000000000000000000000000095f
   account_enable_on_day_reset: true
+  stop_active_sessions_on_time_up: true
   polling_interval: 1.2                    # time between refreshing state from Jellyfin server
                                            # (can be 0 when webhooks are defined to call http://yourWatchWise/trigger)
 

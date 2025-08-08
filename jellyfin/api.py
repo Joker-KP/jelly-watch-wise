@@ -54,3 +54,15 @@ class ServerApi:
         policy = self.get_user_policy(user_id)
         policy["EnabledFolders"] = folders
         self.set_user_policy(user_id, policy)
+
+    def get_sessions(self):
+        r = requests.get(f'{self.server}/Sessions', headers=self.headers)
+        if r.status_code == 200:
+            return self.decoder.decode(r.text)
+        return []
+
+    def stop_session(self, session_id):
+        url = f'{self.server}/Sessions/{session_id}/Playing/Stop'
+        r = requests.post(url, headers=self.headers)
+        if r.status_code != 204:
+            print(f"Error stopping session {session_id}: {r.status_code} - {r.text}")

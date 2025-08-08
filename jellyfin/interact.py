@@ -84,6 +84,9 @@ class ServerInteraction:
                 kept_folders = self.keep_unlimited_folders(folders)
                 self.api.set_enabled_folders(user_id, kept_folders)
                 logger.info('folders disabled - soft lock action')
+                if self.config.stop_active_sessions_on_time_up:
+                    self.stop_all_user_sessions(user_id)
+                    logger.info('all active user sessions stopped')
 
     def get_today_watched_min(self, user_id):
         now = datetime.today()
@@ -134,3 +137,12 @@ class ServerInteraction:
         view['active_msg'] = i18n.t('disabled') if is_disabled else i18n.t('enabled')
         view['progress'] = time_watched / altered_limit
         view['folders'] = "Folders:\n" + " \n".join(folders)
+
+    def stop_all_user_sessions(self, user_id):
+        logger.info(f"Stopping all sessions for user {self.api.get_users().get(user_id, user_id)}")
+        sessions = self.api.get_sessions()
+        for session in sessions:
+            if session.get("UserId") == user_id and session.get("Id"):
+                session_id = session["Id"]
+                logger.info(f"Stopping session: {session_id}")
+                self.api.stop_session(session_id)
