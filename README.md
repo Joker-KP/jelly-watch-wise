@@ -74,7 +74,7 @@ docker pull macjoker/jelly-watch-wise
 3. Run the container
 
 ```bash
-docker run -p 8080:8080 --restart unless-stopped -d -v ./config:/app/config -t macjoker/jelly-watch-wise
+docker run -e TZ=America/New_York -p 8080:8080 --restart unless-stopped -d -v ./config:/app/config -t macjoker/jelly-watch-wise
 ```
 The app will also store logs and backups of media folder UUIDs in the specified config folder.
 
