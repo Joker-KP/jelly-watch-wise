@@ -103,7 +103,7 @@ class ServerInteraction:
 
     def alter_limit(self, user_id, diff):
         current_limit = self.user_data[user_id]['altered_limit']
-        self.user_data[user_id]['altered_limit'] = clip(current_limit + diff, 0, 360)
+        self.user_data[user_id]['altered_limit'] = clip(current_limit + diff, 0, 1440)
 
     def get_altered_limit(self, user_id):
         return self.user_data[user_id]['altered_limit']
