@@ -6,7 +6,7 @@ import yaml
 
 from config import logger
 from jellyfin.api import ServerApi
-from jellyfin.stats import PlaytimeReporting, JellyStats
+from jellyfin.stats import PlaytimeReporting, JellyStats, StatsUnavailableError
 from misc import clip
 
 
@@ -66,7 +66,12 @@ class ServerInteraction:
 
     def media_folders_locker(self, user_id):
         logger.debug('media folders lock/unlock')
-        time = self.get_today_watched_min(user_id)
+        try:
+            time = self.get_today_watched_min(user_id)
+        except StatsUnavailableError as e:
+            # fail closed: without a reliable watch time, keep the current lock state
+            logger.error(f'watch time unknown, lock state unchanged: {e}')
+            return
         time_left = self.user_data[user_id]['altered_limit'] - time
         folders = self.api.get_enabled_folders(user_id)
         if not self.are_only_unlimited_folders(folders):
@@ -116,7 +121,11 @@ class ServerInteraction:
     def refresh_view(self, view, user_id):
         logger.debug('refresh_view started for {}'.format(self.select_users[user_id]))
         is_disabled = self.api.is_user_disabled(user_id)
-        time_watched = self.get_today_watched_min(user_id)
+        try:
+            time_watched = self.get_today_watched_min(user_id)
+        except StatsUnavailableError as e:
+            logger.error(f'watch time unknown, view not refreshed: {e}')
+            return
         altered_limit = self.get_altered_limit(user_id)
         default_limit = self.config.get_limit(user_id)
         time_left = altered_limit - time_watched

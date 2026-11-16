@@ -6,6 +6,10 @@ import requests
 from misc import get_hours_of_today
 
 
+class StatsUnavailableError(Exception):
+    pass
+
+
 class AggregatedStatsSource:
     @abstractmethod
     def get_total_time_sec(self, user_id, date_start, date_end):
@@ -25,13 +29,17 @@ class PlaytimeReporting(AggregatedStatsSource):
         sql = f"SELECT SUM(PlayDuration) AS TotalTime FROM PlaybackActivity WHERE UserId='{user_id}'" \
               f" AND DateCreated > '{date_start}' AND DateCreated < '{date_end}'"
         payload = {'CustomQueryString': sql}
-        r = requests.post(f"{self.server}/user_usage_stats/submit_custom_query", headers=self.headers,
-                          data=json.dumps(payload))
+        try:
+            r = requests.post(f"{self.server}/user_usage_stats/submit_custom_query", headers=self.headers,
+                              data=json.dumps(payload), timeout=10)
+        except requests.RequestException as e:
+            raise StatsUnavailableError(f'Playback Reporting request failed: {e}') from e
+        if r.status_code != 200:
+            raise StatsUnavailableError(f'Playback Reporting returned HTTP {r.status_code}')
         time_sec = 0
-        if r.status_code == 200:
-            result_text = self.decoder.decode(r.text)["results"][0][0]
-            if result_text:
-                time_sec = int(result_text)
+        result_text = self.decoder.decode(r.text)["results"][0][0]
+        if result_text:
+            time_sec = int(result_text)
         return time_sec
 
 
@@ -50,12 +58,17 @@ class JellyStats(AggregatedStatsSource):
             'hours': f'{hours}',
             'userid': f'{user_id}'
         }
-        r = requests.post(f"{self.server}/stats/getGlobalUserStats", headers=self.headers, data=json.dumps(payload))
+        try:
+            r = requests.post(f"{self.server}/stats/getGlobalUserStats", headers=self.headers,
+                              data=json.dumps(payload), timeout=10)
+        except requests.RequestException as e:
+            raise StatsUnavailableError(f'JellyStat request failed: {e}') from e
+        if r.status_code != 200:
+            raise StatsUnavailableError(f'JellyStat returned HTTP {r.status_code}')
+        if not r.text:  # version 1.1.1 returns inconsistent results - empty string instead of reporting 0 plays
+            return 0
         time_sec = 0
-        if r.status_code == 200:
-            if not r.text:  # version 1.1.1 returns inconsistent results - empty string instead of reporting 0 plays
-                return 0
-            result_text = self.decoder.decode(r.text)["total_playback_duration"]
-            if result_text:
-                time_sec = int(result_text)
+        result_text = self.decoder.decode(r.text)["total_playback_duration"]
+        if result_text:
+            time_sec = int(result_text)
         return time_sec
