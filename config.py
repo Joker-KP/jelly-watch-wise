@@ -70,6 +70,8 @@ class Configuration:
         self.no_limit_folders = self.get_key('limits', 'no_limit_folders', [])
         self.polling_interval = self.get_key('limits', 'polling_interval', 0)
         self.account_enable_on_day_reset = self.get_key('limits', 'account_enable_on_day_reset', False)
+        self.lock_method = self.get_key('limits', 'lock_method', 'folders')
+        self.no_limit_tag = self.get_key('limits', 'no_limit_tag', 'jww-no-limit')
 
         self.default_user = self.get_key('view', 'default_user', None)
         self.language = self.get_key('view', 'language', 'en')

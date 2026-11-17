@@ -79,11 +79,32 @@ docker run -d -v ./config:/app/config -t macjoker/jelly-watch-wise
 The app will also store logs and backups of media folder UUIDs in the specified config folder.
 
 ## How does the lock work?
-To apply time limits, ensure Enable All Folders is not selected for any user you wish to have limits applied.
-Instead, manually select individual media folders available to each user.
+The app polls the watch time of each user. When the time limit is exceeded, it applies a soft lock:
+media currently playing continues until the end, but no new media can be started.
+Once time is available again (limit raised or new day), the lock is removed.
+The lock method is set with `limits.lock_method`.
 
-**When time limit is exceeded**
-the app unselects all media libraries for the user, effectively revoking access. Media currently playing will continue until the end, but no new media can be accessed.
+**`folders` (default)**
+unselects all media libraries for the user (except `no_limit_folders`).
+Ensure Enable All Folders is not selected for any user you wish to have limits applied.
+Instead, manually select individual media folders available to each user.
+The selected folders are backed up in `config/user-folders.bck` and restored on unlock.
+
+Note: while libraries are removed, Jellyfin answers requests for them with HTTP 401.
+Some clients (e.g. Streamyfin 0.55 and later) treat any 401 as an expired session and log the user out.
+
+**`tags`**
+keeps all libraries and sets "Allow items with tags" (`AllowedTags`) to `no_limit_tag` (default `jww-no-limit`).
+Only items carrying that tag stay visible, everything else is hidden: libraries stay visible,
+and clients get (empty) lists with HTTP 200 instead of 401, so nobody gets logged out.
+* Works with Enable All Folders too.
+* The user's own allowed tags are backed up in `config/user-tags.bck` and restored on unlock.
+* The lock state is read from the user policy, so restarting the app does not lose it.
+* `no_limit_folders` is not supported. Instead, tag the media that should stay available with `no_limit_tag`
+  (on a movie, an episode, or a series; episodes inherit the tag of their series).
+  Tagging a whole library is not reliable: Jellyfin's list queries only check the item's and the series' tags.
+* Switching from `folders` to `tags` restores libraries removed by an earlier `folders` lock.
+
 
 **Immediate playback stop** is also possible.
 The app includes buttons to immediately stop playback by disabling the user's account.

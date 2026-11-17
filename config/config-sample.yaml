@@ -13,6 +13,11 @@ limits:                                    # all time values are in minutes
   no_limit_folders:                        # folders (media libraries) that will be kept after exceeding limits
     - b4f0000000000000000000000000095f
   account_enable_on_day_reset: true
+  lock_method: folders                     # folders: remove libraries from the user (default)
+                                           # tags: keep libraries, hide all items via "Allow items with tags"
+                                           #       (clients get empty libraries instead of HTTP 401;
+                                           #       use no_limit_tag instead of no_limit_folders)
+  no_limit_tag: jww-no-limit               # lock_method 'tags': items/series with this tag stay visible during the lock
   polling_interval: 1.2                    # time between refreshing state from Jellyfin server
                                            # (can be 0 when webhooks are defined to call http://yourWatchWise/trigger)
 

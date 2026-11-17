@@ -54,3 +54,11 @@ class ServerApi:
         policy = self.get_user_policy(user_id)
         policy["EnabledFolders"] = folders
         self.set_user_policy(user_id, policy)
+
+    def get_allowed_tags(self, user_id):
+        return self.get_user_policy(user_id)["AllowedTags"]
+
+    def set_allowed_tags(self, user_id, tags):
+        policy = self.get_user_policy(user_id)
+        policy["AllowedTags"] = tags
+        self.set_user_policy(user_id, policy)
