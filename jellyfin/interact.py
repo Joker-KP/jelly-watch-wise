@@ -36,10 +36,33 @@ class FoldersBackup:
         return []
 
 
+class TagsBackup:
+    def __init__(self):
+        self.tags_backup_name = 'config/user-tags.bck'
+
+    def _load(self):
+        if os.path.isfile(self.tags_backup_name):
+            with open(self.tags_backup_name, 'r') as file:
+                return yaml.safe_load(file) or {}
+        return {}
+
+    def keep_user_tags(self, user_id, tags):
+        logger.debug(f'keep allowed tags of user {user_id}: {tags}')
+        tags_collection = self._load()
+        tags_collection[user_id] = tags
+        with open(self.tags_backup_name, 'w') as file:
+            yaml.dump(tags_collection, file)
+
+    def restore_user_tags(self, user_id):
+        logger.debug(f'restore allowed tags of user {user_id}')
+        return self._load().get(user_id, [])
+
+
 class ServerInteraction:
     def __init__(self, config):
         self.config = config
         self.backup = FoldersBackup()
+        self.tags_backup = TagsBackup()
         if config.stats_host:
             stats = JellyStats(config.stats_host, config.stats_token)
         else:
@@ -68,6 +91,9 @@ class ServerInteraction:
         logger.debug('media folders lock/unlock')
         time = self.get_today_watched_min(user_id)
         time_left = self.user_data[user_id]['altered_limit'] - time
+        if self.config.lock_method == 'tags':
+            self.media_tags_locker(user_id, time_left)
+            return
         folders = self.api.get_enabled_folders(user_id)
         if not self.are_only_unlimited_folders(folders):
             self.backup.keep_user_folders(user_id, folders)
@@ -84,6 +110,27 @@ class ServerInteraction:
                 kept_folders = self.keep_unlimited_folders(folders)
                 self.api.set_enabled_folders(user_id, kept_folders)
                 logger.info('folders disabled - soft lock action')
+
+    def media_tags_locker(self, user_id, time_left):
+        # libraries stay enabled, so clients get empty lists instead of HTTP 401 (which some apps treat as logout)
+        folders = self.api.get_enabled_folders(user_id)
+        if self.are_only_unlimited_folders(folders):
+            prev_folders = self.backup.restore_user_folders(user_id)
+            if len(prev_folders) > len(folders):
+                self.api.set_enabled_folders(user_id, prev_folders)  # undo a lock from the 'folders' method
+                logger.info('folders restored - switching to tag lock')
+        else:
+            self.backup.keep_user_folders(user_id, folders)
+        tags = self.api.get_allowed_tags(user_id)
+        locked = self.config.no_limit_tag in tags
+        if time_left > 0 and locked:
+            self.api.set_allowed_tags(user_id, self.tags_backup.restore_user_tags(user_id))
+            logger.info('allowed tags restored - tag lock removed')
+        elif time_left <= 0 and not locked:
+            self.tags_backup.keep_user_tags(user_id, tags)
+            # "Allow items with tags" replaces the list: only items carrying the no-limit tag stay visible
+            self.api.set_allowed_tags(user_id, [self.config.no_limit_tag])
+            logger.info('items hidden - tag lock action')
 
     def get_today_watched_min(self, user_id):
         now = datetime.today()
