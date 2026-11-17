@@ -1,4 +1,4 @@
-nicegui[plotly,matplotlib]
+nicegui[plotly,matplotlib]>=2,<3
 isort
 requests
 python-i18n
